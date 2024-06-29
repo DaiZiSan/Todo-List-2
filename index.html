@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ToDo List（六十班特别版）</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 通用样式 */
+        body {
+            font-family: 'Arial', sans-serif;
+            padding: 20px;
+            margin: 0;
+            animation: backgroundAnimation 10s infinite;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+            color: #EDE7F6;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            position: relative;
+            display: inline-block;
+            color: #FFC107;
+            animation: rainbowText 10s infinite;
+        }
+        
+        /* 动画效果 */
+        @keyframes backgroundAnimation { /* 省略了动画细节 */ }
+        
+        @keyframes rainbowText { /* 省略了动画细节 */ }
+        
+        @keyframes shake { /* 省略了动画细节 */ }
+        
+        h1 span {
+            animation: shake 0.5s infinite paused;
+        }
+        
+        h1 span:hover {
+            animation-play-state: running;
+        }
+        
+        /* 表单样式 */
+        form {
+            background-color: #FFEB3B;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        
+        /* 输入框和按钮共用样式 */
+        input[type="text"],
+        button {
+            padding: 10px;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+        
+        input[type="text"] {
+            flex-grow: 1;
+            border: 2px solid #FFC107;
+            background-color: #FFF59D;
+            color: #5D4037;
+        }
+        
+        button {
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            font-weight: bold;
+        }
+        
+        /* 各按钮的样式 */
+        #taskForm button {
+            background-color: #CDDC39;
+        }
+        
+        #taskForm button:hover {
+            transform: scale(1.05);
+            background-color: #AFB42B;
+        }
+        
+        /* 任务列表样式 */
+        .task-list {
+            margin-top: 20px;
+        }
+        
+        .task {
+            background-color: #FF5722;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .task button {
+            background-color: #E65100;
+        }
+        
+        .task button:hover {
+            background-color: #BF360C;
+        }
+        
+        /* 功能按钮样式 */
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        /* 隐藏的文件输入 */
+        input[type="file"] {
+            display: none;
+        }
+        
+        /* 头像和菜单样式 */
+        .avatar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid #FFC107;
+        }
+        
+        .menu {
+            display: none;
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            background-color: #FFEB3B;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        .menu button {
+            background-color: #CDDC39;
+            border: none;
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .menu button:hover {
+            background-color: #AFB42B;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <h1>ToDo List（六十班特别版）</h1>
+
+    <form id="loginForm">
+        <div class="input-group">
+            <input type="file" id="tokenInput" style="display: none;" accept=".lp">
+            <button type="button" id="tokenButton">使用Token登录</button>
+        </div>
+    </form>
+
+    <form id="registerForm">
+        <div class="input-group">
+            <input type="text" id="usernameInput" placeholder="用户名" required>
+            <input type="password" id="passwordInput" placeholder="密码" required>
+            <button type="submit">注册</button>
+        </div>
+    </form>
+
+    <form id="taskForm" style="display: none;">
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="添加新任务" required>
+            <button type="submit">添加任务</button>
+        </div>
+    </form>
+
+    <div class="task-list" id="taskList" style="display: none;"></div>
+
+    <div class="button-group" style="display: none;">
+        <button id="downloadButton">下载任务列表</button>
+        <button id="loadButton">读取任务列表</button>
+        <button id="customBackgroundButton">自定义背景</button>
+        <input type="file" id="fileInput" style="display: none;" accept=".tdl">
+        <input type="file" id="backgroundInput" style="display: none;" accept="image/*">
+    </div>
+
+    <img src="default-avatar.png" alt="Avatar" class="avatar" id="avatar" style="display: none;">
+    <div class="menu" id="menu">
+        <button id="uploadAvatarButton">上传头像</button>
+        <button id="downloadTokenButton">下载新Token</button>
+        <input type="file" id="avatarInput" style="display: none;" accept="image/*">
+    </div>
+
+    <script src="scripts.js"></script>
+
+    <script>
+        let currentUser = null;
+        
+        document.addEventListener('DOMContentLoaded', function () {
+            bindTaskFormSubmission();
+            bindTaskListEvents();
+            bindButtons();
+            bindLoginEvents();
+            bindRegisterEvents();
+            bindAvatarEvents();
+        });
+        
+        function bindTaskFormSubmission() {
+            const taskForm = document.getElementById('taskForm');
+            const taskInput = document.getElementById('taskInput');
+            taskForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                if (taskInput.value.trim() !== '') {
+                    addTask(taskInput.value);
+                    taskInput.value = '';
+                }
+            });
+        }
+        
+        function bindTaskListEvents() {
+            const taskList = document.getElementById('taskList');
+            taskList.addEventListener('click', function (e) {
+                if (e.target.tagName === 'BUTTON') {
+                    removeTask(e.target.parentElement);
+                }
+            });
+        }
+        
+        function addTask(taskDescription) {
+            const taskList = document.getElementById('taskList');
+            const task = document.createElement('div');
+            task.classList.add('task');
+            task.textContent = taskDescription + ' ';
+            const deleteButton = createDeleteButton();
+            task.appendChild(deleteButton);
+            taskList.appendChild(task);
+            saveTasks();
+        }
+        
+        function removeTask(taskElement) {
+            taskElement.remove();
+            saveTasks();
+        }
+        
+        function createDeleteButton() {
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '删除';
+            return deleteButton;
+        }
+        
+        function bindButtons() {
+            document.getElementById('downloadButton').addEventListener('click', downloadTasks);
+            document.getElementById('loadButton').addEventListener('click', function () {
+                document.getElementById('fileInput').click();
+            });
+            document.getElementById('customBackgroundButton').addEventListener('click', function () {
+                document.getElementById('backgroundInput').click();
+            });
+            bindBackgroundChangeEvent();
+        }
+        
+        function downloadTasks() {
+            const tasks = Array.from(document.querySelectorAll('.task')).map(task => task.textContent.trim());
+            currentUser.tasks = tasks;
+            downloadToken(currentUser);
+        }
+        
+        function bindBackgroundChangeEvent() {
+            const backgroundInput = document.getElementById('backgroundInput');
+            backgroundInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imageUrl = e.target.result;
+                    document.body.style.backgroundImage = 'url(' + imageUrl + ')';
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+        
+        function bindLoginEvents() {
+            const tokenButton = document.getElementById('tokenButton');
+            const tokenInput = document.getElementById('tokenInput');
+            tokenButton.addEventListener('click', function () {
+                tokenInput.click();
+            });
+            tokenInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const token = JSON.parse(e.target.result);
+                    login(token);
+                };
+                reader.readAsText(file);
+            });
+        }
+        
+        function bindRegisterEvents() {
+            const registerForm = document.getElementById('registerForm');
+            registerForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                const username = document.getElementById('usernameInput').value;
+                const password = document.getElementById('passwordInput').value;
+                currentUser = { username, password, tasks: [] };
+                downloadToken(currentUser);
+                showTodoList();
+            });
+        }
+        
+        function login(token) {
+            // 这里可以添加验证逻辑
+            currentUser = token;
+            showTodoList();
+            loadTasks(token.tasks);
+        }
+        
+        function showTodoList() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'none';
+            document.getElementById('taskForm').style.display = 'block';
+            document.getElementById('taskList').style.display = 'block';
+            document.getElementById('avatar').style.display = 'block';
+            document.querySelector('.button-group').style.display = 'flex';
+        }
+        
+        function loadTasks(tasks) {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach(taskDescription => addTask(taskDescription));
+        }
+        
+        function saveTasks() {
+            if (currentUser) {
+                const tasks = Array.from(document.querySelectorAll('.task')).map(task => task.textContent.trim());
+                currentUser.tasks = tasks;
+                downloadToken(currentUser);
+            }
+        }
+        
+        function downloadToken(token) {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(token));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", token.username + ".lp");
+            document.body.appendChild(downloadAnchorNode);
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+        }
+        
+        function bindAvatarEvents() {
+            const avatar = document.getElementById('avatar');
+            const menu = document.getElementById('menu');
+            avatar.addEventListener('click', function () {
+                menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+            });
+            document.getElementById('uploadAvatarButton').addEventListener('click', function () {
+                document.getElementById('avatarInput').click();
+            });
+            document.getElementById('avatarInput').addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (!file) {
+                    return;
+                }
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const imageUrl = e.target.result;
+                    avatar.src = imageUrl;
+                };
+                reader.readAsDataURL(file);
+            });
+            document.getElementById('downloadTokenButton').addEventListener('click', function () {
+                if (currentUser) {
+                    downloadToken(currentUser);
+                }
+            });
+        }
+        
+    </script>
+</body>
+
+</html>
